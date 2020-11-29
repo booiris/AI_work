@@ -54,7 +54,6 @@ class chess(object):
         x, y = round((e.y - self.mesh) / self.mesh), round((e.x - self.mesh) / self.mesh)
         xx, yy = self.mesh * (x + 1), self.mesh * (y + 1)
         distance = ((xx - e.y) ** 2 + (yy - e.x) ** 2) ** 0.5
-        print("asdf")
         if distance > self.mesh * 0.45 or self.matrix[x][y] != TAG_EMPTY or not self.is_star:
             return
         self.matrix[x][y] = self.now_turn
