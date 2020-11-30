@@ -124,7 +124,11 @@ int evaluation(int chessboard[][15], int now_turn)
 //     for (int i = 0; i < 15;i++)
 //     {
 //         for (int j = 0; j < 15;j++)
+//         {
 //             map[i][j] = (rand() % 4) - 1;
+//             map[i][j] = 0;
+//         }
+            
 //     }
 //     printf("%d\n", evaluation(map, 1));
 // }

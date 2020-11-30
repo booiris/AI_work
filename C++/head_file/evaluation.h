@@ -1,6 +1,6 @@
-#ifndef CIRCLE_H
-#define CIRCLE_H
+#ifndef _EVALUATION_H
+#define _EVALUATION_H
 
-long long evaluation(int chessboard[][15], int now_turn);
+int evaluation(int chessboard[][15], int now_turn);
 
 #endif
