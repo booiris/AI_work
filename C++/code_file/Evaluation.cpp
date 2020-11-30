@@ -11,10 +11,12 @@ enum chess_score
     alive_1 = 10,
     die_4 = 1000,
     die_3 = 100,
-    die_2 = 10
+    die_2 = 10,
+    die_1 = 1,
 };
 
 int now; // 当前下棋的人
+int temp[15];
 int check_cnt(int part[], int len)
 {
     if (part[0] != 0 && part[len - 1] != 0)
@@ -80,8 +82,59 @@ int check(int chess_list[], int len)
     }
     for (int i = 1; i < len - 1; i++)
     {
-        if (chess_list[i] == now && chess_list[i - 1] == 0 && chess_list[i + 1] == 0)
+        if (i + 3 >= len)
+            break;
+        int flag = check_cnt(&chess_list[i], 3);
+        if (flag == 1)
             res += alive_1;
+        if (flag == 2)
+            res += die_1;
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        if (i + 1 >= len || i >= len || chess_list[i] != now)
+            break;
+        if (chess_list[i] == now && chess_list[i + 1] == 0)
+        {
+            switch (i)
+            {
+            case 0:
+                res += die_1;
+                break;
+            case 1:
+                res += die_2;
+                break;
+            case 2:
+                res += die_3;
+                break;
+            case 3:
+                res += die_4;
+            }
+            break;
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        if (len - i - 1 < 0 || len - i - 2 < 0 || chess_list[len - i - 1] != now)
+            break;
+        if (chess_list[len - i - 1] == now && chess_list[len - i - 2] == 0)
+        {
+            switch (i)
+            {
+            case 0:
+                res += die_1;
+                break;
+            case 1:
+                res += die_2;
+                break;
+            case 2:
+                res += die_3;
+                break;
+            case 3:
+                res += die_4;
+            }
+            break;
+        }
     }
     return res;
 }
@@ -90,7 +143,6 @@ int evaluation(int chessboard[][15], int now_turn)
 {
     now = now_turn;
     int res = 0;
-    int temp[15];
     for (int i = 0; i < 15; i++)
     {
         res += check(chessboard[i], 15);
@@ -121,14 +173,6 @@ int evaluation(int chessboard[][15], int now_turn)
 // int map[15][15];
 // int main()
 // {
-//     for (int i = 0; i < 15;i++)
-//     {
-//         for (int j = 0; j < 15;j++)
-//         {
-//             map[i][j] = (rand() % 4) - 1;
-//             map[i][j] = 0;
-//         }
-            
-//     }
+//     map[7][7] = 1;
 //     printf("%d\n", evaluation(map, 1));
 // }
