@@ -6,54 +6,57 @@
 #include "../head_file/AB_serach.h"
 #include "../head_file/Get_position.h"
 #define INF 0x3f3f3f3f
+int t = INF >> 1;
 using namespace std;
-
-int dir[4][2] = {0, 1, 0, -1, 1, 0, -1, 0};
-
+int dir8[8][2] = {0, -1, 0, 1, 1, 0, -1, 0, 1, 1, 1, -1, -1, 1, -1, -1};
 int ab_search(int maxdepth, int alpha, int beta, int now_turn, int chessboard[][15])
 {
-    int cnt;
-    chess_pos list[50];
-    if (maxdepth == 0)
-        return evaluation(chessboard, now_turn) - evaluation(chessboard, -now_turn) * 2;
-    for (int i = 0; i < 15; i++)
+    int cnt = 0;
+    point list[25];
+    get_position(chessboard, list, cnt);
+    if (maxdepth == 0 || cnt == 0)
+        return evaluation(chessboard, now_turn);
+    for (int i = 0; i < cnt; i++)
     {
-        for (int j = 0; j < 15; j++)
-        {
-            if (chessboard[i][j] != 0)
-                continue;
-            chessboard[i][j] = now_turn;
-            int v = -ab_search(maxdepth - 1, -beta, -alpha, -now_turn, chessboard);
-            chessboard[i][j] = 0;
-            if (v >= beta)
-                return beta;
-            if (v > alpha)
-                alpha = v;
-        }
+        point &temp = list[i];
+        chessboard[temp.x][temp.y] = now_turn;
+        int v = -ab_search(maxdepth - 1, -beta, -alpha, -now_turn, chessboard);
+        chessboard[temp.x][temp.y] = 0;
+        if (v >= beta)
+            return beta;
+        if (v > alpha)
+            alpha = v;
     }
     return alpha;
 }
-
+bool chess_vis[15][15];
 void begin_search(int chessboard[][15], int now_turn)
 {
     int best = -INF;
     int px = 0, py = 0;
+    memset(chess_vis, 0, sizeof chess_vis);
     for (int i = 0; i < 15; i++)
     {
         for (int j = 0; j < 15; j++)
         {
             if (chessboard[i][j] != 0)
-                continue;
-            if ((rand() % 10) == 1)
             {
-                chessboard[i][j] = now_turn;
-                int v = ab_search(2, -INF, INF, now_turn, chessboard);
-                if (best < v)
+                for (int k = 0; k < 8; k++)
                 {
-                    best = v;
-                    px = i, py = j;
+                    int nx = i + dir8[k][0], ny = j + dir8[k][1];
+                    if (nx < 0 || nx >= 15 || ny < 0 || ny >= 15)
+                        continue;
+                    if (!chess_vis[nx][ny] && chessboard[nx][ny] == 0)
+                    {
+                        chess_vis[nx][ny] = 1;
+                        int v = ab_search(2, -INF, INF, -1, chessboard);
+                        if (best < v)
+                        {
+                            best = v;
+                            px = nx, py = ny;
+                        }
+                    }
                 }
-                chessboard[i][j] = 0;
             }
         }
     }

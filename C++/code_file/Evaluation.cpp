@@ -13,7 +13,7 @@ enum chess_score
     die_3 = 100,
     die_2 = 10,
     die_1 = 1,
-};
+}; 
 
 int now; // 当前下棋的人
 int temp[15];
