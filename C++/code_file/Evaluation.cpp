@@ -2,18 +2,17 @@
 #include <cstdio>
 #include "../head_file/evaluation.h"
 
-enum chess_score
-{
-    alive_5 = 1000000,
-    alive_4 = 100000,
-    alive_3 = 10000,
-    alive_2 = 1000,
+enum chess_score {
+    alive_5 = 100000,
+    alive_4 = 10000,
+    alive_3 = 1000,
+    alive_2 = 100,
     alive_1 = 10,
-    die_4 = 1000,
-    die_3 = 100,
-    die_2 = 10,
-    die_1 = 1,
-}; 
+    die_4 = 100,
+    die_3 = 10,
+    die_2 = 1,
+    die_1 = 0,
+};
 
 int now; // 当前下棋的人
 int temp[15];

@@ -4,7 +4,9 @@
 #include "../head_file/Get_position.h"
 #include "../head_file/evaluation.h"
 using namespace std;
-bool pos_vis[125][125];
+
+
+bool pos_vis[15][15];
 int dir_8[8][2] = {0, -1, 0, 1, 1, 0, -1, 0, 1, 1, 1, -1, -1, 1, -1, -1};
 void get_position(int chessboard[][15], point position[], int &cnt)
 {
@@ -25,7 +27,7 @@ void get_position(int chessboard[][15], point position[], int &cnt)
                         position[cnt].x = nx;
                         position[cnt].y = ny;
                         cnt++;
-                        if (cnt >= 25)
+                        if (cnt >= 24)
                         {
                             for (int l = 0; l < cnt; l++)
                                 pos_vis[position[l].x][position[l].y] = 0;
