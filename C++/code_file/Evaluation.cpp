@@ -2,21 +2,8 @@
 #include <cstdio>
 #include "../head_file/evaluation.h"
 
-enum chess_score {
-    alive_5 = 100000,
-    alive_4 = 10000,
-    alive_3 = 1000,
-    alive_2 = 100,
-    alive_1 = 10,
-    die_4 = 100,
-    die_3 = 10,
-    die_2 = 1,
-    die_1 = 0,
-};
-
-int now; // 当前下棋的人
 int temp[15];
-int check_cnt(int part[], int len)
+int check_cnt(int part[], int len, int &now)
 {
     if (part[0] != 0 && part[len - 1] != 0)
         return 0;
@@ -27,10 +14,12 @@ int check_cnt(int part[], int len)
     }
     if (part[0] == 0 && part[len - 1] == 0)
         return 1;
+    else if (part[0] == now || part[len - 1] == now)
+        return 0;
     else
         return 2;
 }
-int check(int chess_list[], int len)
+int check(int chess_list[], int len, int &now)
 {
     int res = 0;
     for (int i = 0; i < len; i++)
@@ -53,7 +42,7 @@ int check(int chess_list[], int len)
     {
         if (i + 6 >= len)
             break;
-        int flag = check_cnt(&chess_list[i], 6);
+        int flag = check_cnt(&chess_list[i], 6, now);
         if (flag == 1)
             res += alive_4;
         if (flag == 2)
@@ -63,7 +52,7 @@ int check(int chess_list[], int len)
     {
         if (i + 5 >= len)
             break;
-        int flag = check_cnt(&chess_list[i], 5);
+        int flag = check_cnt(&chess_list[i], 5, now);
         if (flag == 1)
             res += alive_3;
         if (flag == 2)
@@ -73,7 +62,7 @@ int check(int chess_list[], int len)
     {
         if (i + 4 >= len)
             break;
-        int flag = check_cnt(&chess_list[i], 4);
+        int flag = check_cnt(&chess_list[i], 4, now);
         if (flag == 1)
             res += alive_2;
         if (flag == 2)
@@ -83,7 +72,7 @@ int check(int chess_list[], int len)
     {
         if (i + 3 >= len)
             break;
-        int flag = check_cnt(&chess_list[i], 3);
+        int flag = check_cnt(&chess_list[i], 3, now);
         if (flag == 1)
             res += alive_1;
         if (flag == 2)
@@ -140,32 +129,55 @@ int check(int chess_list[], int len)
 
 int evaluation(int chessboard[][15], int now_turn)
 {
-    now = now_turn;
     int res = 0;
     for (int i = 0; i < 15; i++)
     {
-        res += check(chessboard[i], 15);
-        if (i != 0 && i != 14)
+        res += check(chessboard[i], 15, now_turn);
+        for (int j = 0; j < 15; j++)
+            temp[j] = chessboard[j][i];
+        res += check(temp, 15, now_turn);
+    }
+    for (int i = 0; i < 15; i++)
+    {
+        int j;
+        if (i != 14)
         {
-            for (int j = 0; j < 15 - i; j++)
-                temp[j] = chessboard[i + j][j];
-            res += check(temp, 15 - i);
-            for (int j = 0; j <= i; j++)
-                temp[j] = chessboard[i - j][j];
-            res += check(temp, i + 1);
+            for (j = 0; j < 15; j++)
+            {
+                if (i - j < 0)
+                    break;
+                temp[j] = chessboard[j][i - j];
+            }
+            res += check(temp, j, now_turn);
+        }
+        if (i != 0)
+        {
+            for (j = 0; j < 15; j++)
+            {
+                if (i + j >= 15)
+                    break;
+                temp[j] = chessboard[j][i + j];
+            }
+            res += check(temp, j, now_turn);
         }
     }
     for (int i = 0; i < 15; i++)
     {
-        for (int j = 0; j < 15; j++)
-            temp[j] = chessboard[j][i];
-        res += check(temp, 15);
-        for (int j = 0; j < 15 - i; j++)
-            temp[j] = chessboard[j][i + j];
-        res += check(temp, 15 - i);
-        for (int j = 0; j <= i; j++)
-            temp[j] = chessboard[j][i - j];
-        res += check(temp, i + 1);
+        int j;
+        for (j = 0; j < 15; j++)
+        {
+            if (i - j < 0)
+                break;
+            temp[j] = chessboard[14 - j][i - j];
+        }
+        res += check(temp, j, now_turn);
+        for (j = 0; j < 15; j++)
+        {
+            if (i + j >= 15)
+                break;
+            temp[j] = chessboard[14 - j][i + j];
+        }
+        res += check(temp, j, now_turn);
     }
     return res;
 }
@@ -173,5 +185,10 @@ int evaluation(int chessboard[][15], int now_turn)
 // int main()
 // {
 //     map[7][7] = 1;
-//     printf("%d\n", evaluation(map, 1));
+//     map[7][8] = -1;
+//     map[7][9] = -1;
+//     map[7][10] = -1;
+//     map[7][11] = -1;
+//     map[7][12] = -1;
+//     printf("%d\n", evaluation(map, -1));
 // }

@@ -91,7 +91,7 @@ class chess(object):
         self.now_turn = -self.now_turn
         self.ai_working = True
         temp = [x, y]
-        ai(self, temp)
+        ai(self.matrix, temp, self.now_turn)
 
         x = temp[0]
         y = temp[1]

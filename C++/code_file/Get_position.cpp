@@ -1,43 +1,37 @@
-#include <vector>
 #include <algorithm>
-#include <cstdio>
 #include "../head_file/Get_position.h"
 #include "../head_file/evaluation.h"
 using namespace std;
 
-
-bool pos_vis[15][15];
 int dir_8[8][2] = {0, -1, 0, 1, 1, 0, -1, 0, 1, 1, 1, -1, -1, 1, -1, -1};
-void get_position(int chessboard[][15], point position[], int &cnt)
+// point temp_pos[225];
+// int pos_list[15];
+
+bool cmp(const point &a, const point &b)
 {
-    for (int i = 0; i < 15; i++)
+    return a.v > b.v;
+}
+void get_position(int chessboard[][15], point position[], int &cnt, int &now_turn)
+{
+    for (int i = 0; i < 15 && cnt < 75; i++)
     {
-        for (int j = 0; j < 15; j++)
+        for (int j = 0; j < 15 && cnt <75; j++)
         {
-            if (chessboard[i][j] != 0)
+            if (chessboard[i][j] == 0)
             {
                 for (int k = 0; k < 8; k++)
                 {
                     int nx = i + dir_8[k][0], ny = j + dir_8[k][1];
                     if (nx < 0 || nx >= 15 || ny < 0 || ny >= 15)
                         continue;
-                    if (!pos_vis[nx][ny] && chessboard[nx][ny] == 0)
+                    if (chessboard[nx][ny] != 0)
                     {
-                        pos_vis[nx][ny] = 1;
-                        position[cnt].x = nx;
-                        position[cnt].y = ny;
+                        position[cnt].x = i, position[cnt].y = j;
                         cnt++;
-                        if (cnt >= 24)
-                        {
-                            for (int l = 0; l < cnt; l++)
-                                pos_vis[position[l].x][position[l].y] = 0;
-                            return;
-                        }
+                        break;
                     }
                 }
             }
         }
     }
-    for (int l = 0; l < cnt; l++)
-        pos_vis[position[l].x][position[l].y] = 0;
 }
