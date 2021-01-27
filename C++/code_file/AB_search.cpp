@@ -145,26 +145,19 @@ int main()
     int chessboard[15][15];
     memset(chessboard, 0, sizeof chessboard);
     int a, b;
-    while (cin >> a >> b)
+    int now_turn = -1;
+    for (int i = 0; i < 15; i++)
     {
-        if (a == -1)
-            break;
-        chessboard[a][b] = 1;
-        for (int i = 0; i < 15; i++)
+        for (int j = 0; j < 15; j++)
         {
-            for (int j = 0; j < 15; j++)
-            {
-                if (chessboard[i][j] == 1)
-                    printf("O ");
-                else if (chessboard[i][j] == -1)
-                    printf("X ");
-                else
-                    printf(". ");
-            }
-            printf("\n");
+            chessboard[i][j] = 0;
         }
-        printf("\n");
-        begin_search(chessboard, -1);
+    }
+    chessboard[7][7] = 1;
+    while (!is_end(chessboard, -now_turn))
+    {
+        begin_search(chessboard, now_turn);
+        now_turn = -now_turn;
         for (int i = 0; i < 15; i++)
         {
             for (int j = 0; j < 15; j++)
@@ -180,4 +173,39 @@ int main()
         }
         printf("\n");
     }
+    // while (cin >> a >> b)
+    // {
+    //     if (a == -1)
+    //         break;
+    //     chessboard[a][b] = 1;
+    //     for (int i = 0; i < 15; i++)
+    //     {
+    //         for (int j = 0; j < 15; j++)
+    //         {
+    //             if (chessboard[i][j] == 1)
+    //                 printf("O ");
+    //             else if (chessboard[i][j] == -1)
+    //                 printf("X ");
+    //             else
+    //                 printf(". ");
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    //     begin_search(chessboard, -1);
+    //     for (int i = 0; i < 15; i++)
+    //     {
+    //         for (int j = 0; j < 15; j++)
+    //         {
+    //             if (chessboard[i][j] == 1)
+    //                 printf("O ");
+    //             else if (chessboard[i][j] == -1)
+    //                 printf("X ");
+    //             else
+    //                 printf(". ");
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 }
