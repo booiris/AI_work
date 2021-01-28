@@ -11,21 +11,30 @@ import torch.optim as optim
 
 def ai(chess, temp, now_turn):
     ai_dll = cdll.LoadLibrary("E:/Chess/Python/temp.dll")
-    c_input = (c_int * 15 * 15)()
+    # c_input = (c_int * 15 * 15)()
+    # for i in range(15):
+    #     for j in range(15):
+    #         c_input[i][j] = chess[i][j]
+    # ai_dll.begin_search(c_input, now_turn)
+    # for i in range(15):
+    #     for j in range(15):
+    #         if not chess[i][j] == c_input[i][j]:
+    #             temp[0] = i
+    #             temp[1] = j
+    #             chess[i][j] = c_input[i][j]
+    index = []
     for i in range(15):
         for j in range(15):
-            c_input[i][j] = chess[i][j]
-    ai_dll.begin_search(c_input, now_turn)
-    for i in range(15):
-        for j in range(15):
-            if not chess[i][j] == c_input[i][j]:
-                temp[0] = i
-                temp[1] = j
-                chess[i][j] = c_input[i][j]
+            if chess[i][j] == 0:
+                index.append([i, j])
+    p = random.randint(0, len(index) - 1)
+    chess[index[p][0]][index[p][1]] = now_turn
+    temp[0] = index[p][0]
+    temp[1] = index[p][1]
 
 
 maxsize = 300
-epochs = 5
+epochs = 1
 now_index = 1
 batch_size = 32
 now_turn = -1
@@ -95,24 +104,26 @@ def check(nx, ny, mat, turn):
 
 def cal_reward(x, y, chess, now_turn, now_index):
     chess[x][y] = now_turn
-    if check(x, y, chess, now_turn):
-        reward[now_index][1] = 1
-        return 5
-    temp = [0, 0]
-    ai(chess, temp, -now_turn)
     steps[now_index][0] = steps[now_index - 1][4]
     steps[now_index][1] = steps[now_index - 1][5]
     steps[now_index][2] = steps[now_index - 1][6]
     steps[now_index][3] = steps[now_index - 1][7]
     steps[now_index][4] = x
     steps[now_index][5] = y
+    steps[now_index][6] = -1
+    steps[now_index][7] = -1
+    if check(x, y, chess, now_turn):
+        reward[now_index][1] = 1
+        return 1
+    temp = [0, 0]
+    ai(chess, temp, -now_turn)
     steps[now_index][6] = temp[0]
     steps[now_index][7] = temp[1]
     if check(temp[0], temp[1], chess, -now_turn):
         reward[now_index][1] = -1
-        return -5
+        return -1
     reward[now_index][1] = 0
-    return value[x][y]
+    return 0
 
 
 def cal_q_value(net, chessboard, now_turn, step):
@@ -165,7 +176,7 @@ def build_data(net, now_turn, is_begin):
     nxt_reward = cal_reward(action[index][0], action[index][1], chessboard, now_turn, now_index)
     reward[now_index][0] = nxt_reward
     now_index += 1
-    # print(chessboard)
+    print(chessboard)
     print(q_value[0:5])
     print(max(q_value), now_turn, action[index][0], action[index][1], nxt_reward)
     # if now_index % 100 == 0:
@@ -211,7 +222,7 @@ def train():
         for l in range(15):
             chessboard[k][l] = 0
     now_turn = 1
-    for step in range(maxsize):
+    for step in range(maxsize - 10):
         if not build_data(net, now_turn, is_begin):
             is_begin = True
             for m in range(15):
@@ -296,9 +307,9 @@ net = net.cuda()
 target_net = target_net.cuda()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
-# checkpoint = torch.load("weight/temp.pth.tar")
-# net.load_state_dict(checkpoint['model_state_dict'])
-# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+checkpoint = torch.load("weight/temp1.pth.tar")
+net.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 wf = copy.deepcopy(net.state_dict())
 target_net.load_state_dict(wf)
 
@@ -319,4 +330,4 @@ torch.save({
     'epoch': epochs,
     'model_state_dict': net.state_dict(),
     'optimizer_state_dict': optimizer.state_dict(),
-}, "weight/temp.pth.tar")
+}, "weight/temp2.pth.tar")
