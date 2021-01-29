@@ -230,7 +230,6 @@ def train():
                     chessboard[m][n] = 0
         else:
             is_begin = False
-        print(now_index, step)
         if step > 80:
             data_index = random.sample(range(1, now_index), batch_size)
             random.shuffle(data_index)
@@ -307,7 +306,7 @@ net = net.cuda()
 target_net = target_net.cuda()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
-checkpoint = torch.load("weight/temp1.pth.tar")
+checkpoint = torch.load("weight/rand.pth.tar")
 net.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 wf = copy.deepcopy(net.state_dict())
@@ -326,8 +325,8 @@ criterion = nn.MSELoss()
 
 for i in range(epochs):
     train()
-torch.save({
-    'epoch': epochs,
-    'model_state_dict': net.state_dict(),
-    'optimizer_state_dict': optimizer.state_dict(),
-}, "weight/temp2.pth.tar")
+    torch.save({
+        'epoch': epochs,
+        'model_state_dict': net.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+    }, "weight/rand.pth.tar")

@@ -266,9 +266,9 @@ target_net.load_state_dict(wf)
 net = net.cuda()
 target_net = target_net.cuda()
 
-# checkpoint = torch.load("weight/temp2.pth.tar")
-# net.load_state_dict(checkpoint['model_state_dict'])
-# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+checkpoint = torch.load("weight/ai.pth.tar")
+net.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
 criterion = nn.MSELoss()
 
