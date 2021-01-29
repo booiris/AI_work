@@ -41,7 +41,7 @@ def ai(chess, temp, now_turn):
 
 
 maxsize = 300
-epochs = 1
+epochs = 2
 now_index = 1
 batch_size = 32
 now_turn = -1
@@ -313,9 +313,9 @@ net = net.cuda()
 target_net = target_net.cuda()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
-# checkpoint = torch.load("weight/ann.pth.tar")
-# net.load_state_dict(checkpoint['model_state_dict'])
-# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+checkpoint = torch.load("weight/ann.pth.tar")
+net.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 wf = copy.deepcopy(net.state_dict())
 target_net.load_state_dict(wf)
 
