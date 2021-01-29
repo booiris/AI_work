@@ -77,7 +77,7 @@ def choose(nets):
 
 def build_data():
     data_index = random.sample(range(100), batch_size)
-    target = torch.empty([batch_size],dtype=torch.long)
+    target = torch.empty([batch_size], dtype=torch.long)
     chessboard = torch.zeros([batch_size, 225])
     for i in range(batch_size):
         step = steps[data_index[i]]
@@ -134,7 +134,7 @@ def copy_param(net, params):
 def cross(net1, net2):
     param1 = get_param(net1)
     param2 = get_param(net2)
-    s = np.random.randint(0, par_maxcnt - 2)
+    s = np.random.randint(0, par_maxcnt / 2)
     e = np.random.randint(s, par_maxcnt)
     temp = copy.deepcopy(param1[s:e])
     param1[s:e] = copy.deepcopy(param2[s:e])
@@ -153,11 +153,11 @@ def mutation(net):
                 for i in range(param.size()[0]):
                     for j in range(param[i].size()[0]):
                         if p[cnt] < mutation_p:
-                            param[i][j] = np.random.random()
+                            param[i][j] = np.random.random() * np.power(10, np.random.random())
                         cnt += 1
             elif 'bias' in name:
                 for i in range(param.size()[0]):
-                    param[i] = np.random.random()
+                    param[i] = np.random.random() * np.power(10, np.random.random())
                     cnt += 1
 
 

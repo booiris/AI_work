@@ -22,15 +22,22 @@ def ai(chess, temp, now_turn):
     #             temp[0] = i
     #             temp[1] = j
     #             chess[i][j] = c_input[i][j]
-    index = []
-    for i in range(15):
-        for j in range(15):
-            if chess[i][j] == 0:
-                index.append([i, j])
-    p = random.randint(0, len(index) - 1)
-    chess[index[p][0]][index[p][1]] = now_turn
-    temp[0] = index[p][0]
-    temp[1] = index[p][1]
+
+    # index = []
+    # for i in range(15):
+    #     for j in range(15):
+    #         if chess[i][j] == 0:
+    #             index.append([i, j])
+    # p = random.randint(0, len(index) - 1)
+    # chess[index[p][0]][index[p][1]] = now_turn
+    # temp[0] = index[p][0]
+    # temp[1] = index[p][1]
+
+    global net, now_index
+    action, q_value = cal_q_value(net, chess, now_turn, steps[now_index][2:6])
+    index = q_value.index(max(q_value))
+    temp[0] = action[index][0]
+    temp[1] = action[index][1]
 
 
 maxsize = 300
@@ -176,9 +183,9 @@ def build_data(net, now_turn, is_begin):
     nxt_reward = cal_reward(action[index][0], action[index][1], chessboard, now_turn, now_index)
     reward[now_index][0] = nxt_reward
     now_index += 1
-    print(chessboard)
-    print(q_value[0:5])
-    print(max(q_value), now_turn, action[index][0], action[index][1], nxt_reward)
+    # print(chessboard)
+    # print(q_value[0:5])
+    # print(max(q_value), now_turn, action[index][0], action[index][1], nxt_reward)
     # if now_index % 100 == 0:
     #     print(chessboard)
     #     print(q_value[0:5], max(q_value), action[q_value.index(max(q_value))][0],
@@ -306,9 +313,9 @@ net = net.cuda()
 target_net = target_net.cuda()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
-checkpoint = torch.load("weight/rand.pth.tar")
-net.load_state_dict(checkpoint['model_state_dict'])
-optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+# checkpoint = torch.load("weight/ann.pth.tar")
+# net.load_state_dict(checkpoint['model_state_dict'])
+# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 wf = copy.deepcopy(net.state_dict())
 target_net.load_state_dict(wf)
 
@@ -329,4 +336,4 @@ for i in range(epochs):
         'epoch': epochs,
         'model_state_dict': net.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-    }, "weight/rand.pth.tar")
+    }, "weight/ann.pth.tar")
