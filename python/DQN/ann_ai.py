@@ -127,24 +127,40 @@ def build_data(net, chessboard):
         chessboard[nx][ny] = now_turn
         now_state[now_index] = copy.deepcopy(chessboard)
 
-        # print(chessboard)
-        # print(q_value[0:5])
-        # print(now_index, max(q_value), now_turn, nx, ny)
-
         if check(nx, ny, chessboard, now_turn):
             reward[now_index][1] = 1
             now_index += 1
             break
         else:
             reward[now_index][1] = 0
+            now_turn = -now_turn
+            now_index += 1
 
-        now_turn = -now_turn
-        now_index += 1
+        print(chessboard)
+        print(q_value[0:5])
+        print(now_index, max(q_value), now_turn, nx, ny)
+
+        temp = [0, 0]
+        reward[now_index][2] = now_turn
+        reward[now_index][3] = star_index
+        ai(chessboard, temp, now_turn)
+        steps.append([temp[0], temp[1]])
+        now_state[now_index] = copy.deepcopy(chessboard)
+        if check(temp[0], temp[1], chessboard, now_turn):
+            reward[now_index][1] = 1
+            now_index += 1
+            break
+        else:
+            reward[now_index][1] = 0
+            now_turn = -now_turn
+            now_index += 1
+
     end_index = now_index
     # 计算reward
     n_index = copy.deepcopy(now_index)
+    n_index -= 1
     winner = now_turn
-    while n_index > star_index:
+    while n_index >= star_index:
         if int(reward[n_index][2]) == winner:
             reward[n_index][0] = 1
         else:
@@ -169,7 +185,11 @@ def train(net, target_net, chessboard):
                 chessboard[i][j] = 0
         build_data(net, chessboard)
 
-    data_index = random.sample(range(0, now_index), batch_size)
+    index = []
+    for i in range(now_index):
+        if reward[i][2] == 1:
+            index.append(i)
+    data_index = random.sample(index, batch_size)
     random.shuffle(data_index)
     target = torch.empty([batch_size, 1])
     now_ini = 0
@@ -190,9 +210,9 @@ def train(net, target_net, chessboard):
         if reward[i][1] == 1:
             now_ini += 1
             continue
-        action, q_value = cal_q_value(target_net, now_state[i], int(-reward[i][2]), int(i - reward[i][3]),
-                                      steps[int(reward[i][3]):])
-        target[now_ini][0] += -max(q_value)
+        action, q_value = cal_q_value(target_net, now_state[i + 1], int(reward[i][2]), int(i + 1 - reward[i][3]),
+                                      steps[int(reward[i + 1][3]):])
+        target[now_ini][0] += max(q_value)
         now_ini += 1
     target = target.cuda()
     loss = criterion(out, target)
@@ -226,10 +246,10 @@ class Net(nn.Module):
 
 index_max = 60
 maxsize = 300
-epochs = 1200
+epochs = 300
 now_index = 1
 batch_size = 32
-renew_max = 30
+renew_max = 50
 sita = 0.1
 
 chessboard = np.empty([15, 15], dtype=int)
