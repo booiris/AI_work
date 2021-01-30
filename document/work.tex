@@ -1,9 +1,19 @@
-\documentclass[UTF8]{ctexart}
+\documentclass[UTF8]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{enumerate}
+\usepackage[colorlinks,linkcolor=black]{hyperref}
+\usepackage{ctex}
 \usepackage{titling}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{array}
+\usepackage{float}
+\usepackage{subfigure}
+
+
+
 
 
 \title{人工智能大作业报告}
@@ -11,21 +21,217 @@
 % todo: 修改标题格式
 
 \begin{document}
+
 \maketitle
+\tableofcontents
 
 \section{监督学习}
 \subsection{问题描述}
-能够用拍照方式识别五子棋下棋过程中当前落子的位置，识别程序中应使用到监督
-学习算法。
-\subsection{aaa}
+能够用拍照方式识别五子棋下棋过程中当前落子的位置，
+识别程序中应使用到监督学习算法。
+\subsection{方法描述}
+使用yolov5实现对五子棋的目标识别，使用编写的五子棋界面生成训练
+和测试数据。下载预训练模型后，进行迁移学习，训练得到识别黑白棋的
+模型。
+\subsection{原理描述}
+
+% todo yolov5算法讲解
+
+\subsection{步骤描述}
+
+\begin{enumerate}
+    \item 利用五子棋界面生成训练数据
+    
+    \subitem 对于五子棋界面的实现，考虑到界面不是本次作业实现的
+    主要目标，所以使用tkinter库来实现五子棋简易界面。
+
+    \subitem yolov5所用的标签格式为\ [物体类型\ 物体中心
+    x值\ 物体中心y值\ 物体长度\ 物体宽度]。随机生成五子棋
+    局面，绘制界面，生成标签，训练数据大小为200张图片
+
+    \subitem 生成训练数据的代码位于Python/create\_train\_data.py
+    文件中。
+    
+    \item 下载yolov5项目，下载预训练模型
+    
+    \subitem yolov5所用的模型代码来自github上的一个
+    \href{https://github.com/ultralytics/yolov5}{项目}。
+    考虑到黑白棋的特征明显，识别出来的难度不大，
+    所以我使用的预训练模型为YOLOv5s模型。在进行100次的训练后
+    能够较好地得到结果。
+
+    \item 对模型进行训练
+    
+    \subitem 模型训练过程中准确率和召回率和IoU阈值为0.5时的mAP值变化如下：
+
+    \begin{figure}[H]
+        \centering
+        \subfigure[准确率]{
+        \includegraphics[width=0.25\textwidth]{img/precision.PNG}
+        }
+        \subfigure[召回率]{
+        \includegraphics[width=0.27\textwidth]{img/recall.PNG}
+        }
+        \subfigure[mAP:0.5]{
+        \includegraphics[width=0.25\textwidth]{img/map.PNG}
+        }
+        \caption{模型指标变化}
+    \end{figure}
+    
+    \subitem 可以看出模型效果随着训练逐渐变好。    
+
+\end{enumerate}
+
+\subsection{结果分析}
+
+输入的测试图片和识别图片如下：
+ 
+    \begin{figure}[H]
+            \centering
+            \subfigure[测试图片]{
+            \includegraphics[width=0.4\textwidth]{img/test.PNG}
+            }
+            \subfigure[识别图片]{
+            \includegraphics[width=0.4\textwidth]{img/test_res.png}
+            }
+            \caption{模型预测图片}
+            
+    \end{figure}
+
+可以看到白棋和黑棋被识别了出来。
 
 \section{博弈搜索}
 \subsection{问题描述}
+采用一种博弈搜索算法，实现五子棋博弈程序，其中对棋局状态的判断采用人为设
+定函数方式。
+\subsection{方法描述}
+
+通过自定义的评估函数返回棋局评分，使用alpha-beta搜索，结合一定的
+优化方法，计算得到ai下一步所走的位置。
+
+\subsection{原理描述}
+
+AB剪枝就是minmax搜索的优化。在MAX层，假设当前层已经搜索到一个最大值 X， 
+如果发现下一个节点的下一层（也就是MIN层）
+会产生一个比X还小的值，那么就直接剪掉此节点。在MIN层，
+假设当前层已经搜索到一个最小值 Y， 如果发现下一个节点的下一层（也就是MAX层）
+会产生一个比Y还大的值，那么就直接剪掉此节点。
+
+当搜索到达了最大层数，对节点进行评分，根据不同节点评分进行剪枝。
+搜索完毕后，走分数最大的位置。
+
+\subsection{步骤描述}
+
+\begin{enumerate}
+    \item 编写自定义的评估函数
+    
+    \subitem 评估函数采用了常用的根据形成的棋型打分的方式
+    对于形成的不同棋型，如活四、活三、死四等，给予不同的分数。
+    对于敌我双方分数的判定，没有进行特殊的分析方式，而是分别
+    计算双方的总分，然后敌方分数降低一半进行相减，得到局面分数。
+
+    \subitem 评估函数的实现方式在C++/code\_file/Evaluation.cpp文件中。
+    \item 编写获取搜索位置的函数
+    
+    \subitem 根据五子棋“战场”的局部性，我认为下载偏远地方的
+    棋子对于胜率影响不大，所以对于一个位置，只有它周围有棋子
+    的时候，才进行搜索。
+
+    \subitem 可以根据启发式函数获取搜索位置，但我试着实现计算
+    空位得分方式进行启发式搜索，发现结果反而更慢。。。于是就
+    放弃了启发式搜索。
+
+    \subitem 搜索位置函数实现方式在C++/code\_file/Get\_position.cpp文件中。
+    \item 编写搜索函数
+    
+    \subitem 首先调用获取搜索位置函数获得搜索位置，然后
+    进行alpha-beta搜索，当搜索到达最大层数时，调用评估函数
+    ，返回评估值。
+
+    \subitem 在搜索的过程中，需要判断局面是否结束，
+    如果敌方胜利，则上一步的落子是失败的，不能下在这。
+
+    \subitem 搜索函数实现方式C++/code\_file/AB\_search.cpp文件中。
+
+\end{enumerate}
+
+\subsection{结果分析}
+
+设置搜索层数为4时，ai搜索一些步骤耗费时间较长，可能是评估
+函数定义得不够好，导致alpha-beta发生的剪枝次数较少，ai搜索
+轻情况太多，搜索时间较长。
+
+设置搜索层数为2时，ai能够较快地得出结果，并且具有一定的
+棋力。
+
+对于搜索效果的进一步优化，我认为从
+
 
 \section{进化计算}
 \subsection{问题描述}
+将上述博弈搜索算法中判断棋局状态的函数改为一种人工神经网络模型，并采用进
+化计算方法对该人工神经网络模型来进行学习，使得五子棋博弈程序的下棋水平不断提高。
+\subsection{方法描述}
+
+在进行方法说明前，我得吐槽一句，从一开始我就对遗传算法优化
+神经网络的效果是不报任何希望的。不说neat算法同时进化网络
+结构和权值，所耗的时间无法估计。找了一个利用遗传算法优化网络权值的论文，
+一看，方法是首先优化得到粗略的权值，最后还是用梯度下降训练
+权值，好家伙，再一看，才几百个参数。对于225的输入数量，上万
+的权值数，这点参数还不够塞牙缝的。
+
+我将这个问题视为一个多分类问题，输入当前局面，输出为各点的落子
+概率。以网上找的棋局作为训练数据，进行监督学习。
+
+首先确定网络结构，输入层节点数为225，一个隐含层，节点数为300，
+输出层，节点数为225，最后输出值进行softmax归一化，预测下一步
+的落子。适应度函数为交叉熵函数，标签为棋手下一步的落子位置。
+根据各网络的适应度进行选择操作，之后进行交叉，变异操作，不断进行
+迭代。
+
+\subsection{原理描述}
+
+开始时本来不准备用监督学习的，打算以第二位的搜索ai作为环境，
+坚持的时间越久，适应度越高。但是每个网络都在12步之内就输掉，
+适应度也一直不会升高。想想还是不太靠谱，就换成监督学习了。
+
+
+
+\subsection{步骤描述}
+
+实现代码位于/Python/Evaluation/Net.py文件中。
+
+\begin{enumerate}
+    \item 适应度函数
+    \item 选择操作
+    \item 交叉操作
+    \item 编译操作
+
+\end{enumerate}
+
+\subsection{结果分析}
+
+下面是迭代了100代后最好适应度和平均适应度的变化：
+
+
+
+可能是我没写对吧。。。种群的适应度没有什么太大的变化，可能
+是交叉操作过于简单，对于网络生成的权值影响较小。
+
 
 \section{强化学习}
 \subsection{问题描述}
+采用强化学习算法对上述人工神经网络模型进行学习，使得五子棋博弈程序的下棋
+水平不断提高。
+\subsection{方法描述}
+
+\subsection{原理描述}
+
+\subsection{步骤描述}
+
+\subsection{结果分析}
 
 \end{document}
+
+
+\section {附录}

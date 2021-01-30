@@ -11,17 +11,17 @@ import torch.optim as optim
 
 def ai(chess, temp, now_turn):
     ai_dll = cdll.LoadLibrary("E:/Chess/Python/temp.dll")
-    # c_input = (c_int * 15 * 15)()
-    # for i in range(15):
-    #     for j in range(15):
-    #         c_input[i][j] = chess[i][j]
-    # ai_dll.begin_search(c_input, now_turn)
-    # for i in range(15):
-    #     for j in range(15):
-    #         if not chess[i][j] == c_input[i][j]:
-    #             temp[0] = i
-    #             temp[1] = j
-    #             chess[i][j] = c_input[i][j]
+    c_input = (c_int * 15 * 15)()
+    for i in range(15):
+        for j in range(15):
+            c_input[i][j] = chess[i][j]
+    ai_dll.begin_search(c_input, now_turn)
+    for i in range(15):
+        for j in range(15):
+            if not chess[i][j] == c_input[i][j]:
+                temp[0] = i
+                temp[1] = j
+                chess[i][j] = c_input[i][j]
 
     # index = []
     # for i in range(15):
@@ -33,11 +33,11 @@ def ai(chess, temp, now_turn):
     # temp[0] = index[p][0]
     # temp[1] = index[p][1]
 
-    global net, now_index
-    action, q_value = cal_q_value(net, chess, now_turn, steps[now_index][2:6])
-    index = q_value.index(max(q_value))
-    temp[0] = action[index][0]
-    temp[1] = action[index][1]
+    # global net, now_index
+    # action, q_value = cal_q_value(net, chess, now_turn, steps[now_index][2:6])
+    # index = q_value.index(max(q_value))
+    # temp[0] = action[index][0]
+    # temp[1] = action[index][1]
 
 
 maxsize = 300
@@ -183,9 +183,9 @@ def build_data(net, now_turn, is_begin):
     nxt_reward = cal_reward(action[index][0], action[index][1], chessboard, now_turn, now_index)
     reward[now_index][0] = nxt_reward
     now_index += 1
-    # print(chessboard)
-    # print(q_value[0:5])
-    # print(max(q_value), now_turn, action[index][0], action[index][1], nxt_reward)
+    print(chessboard)
+    print(q_value[0:5])
+    print(max(q_value), now_turn, action[index][0], action[index][1], nxt_reward)
     # if now_index % 100 == 0:
     #     print(chessboard)
     #     print(q_value[0:5], max(q_value), action[q_value.index(max(q_value))][0],
