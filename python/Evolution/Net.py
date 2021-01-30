@@ -52,15 +52,18 @@ class Net(nn.Module):
 
 
 def choose(nets):
-    global group_cnt
+    global group_cnt, best_v
     chessboard, target = build_data()
     fit_v = []
     sum = 0
     for i in range(group_cnt):
         v = fitness(nets[i], chessboard, target)
         fit_v.append(v)
-        sum += v
-    print(fit_v)
+    best_v = min([best_v, min(fit_v)])
+    print(np.mean(fit_v), best_v)
+    for i in range(group_cnt):
+        fit_v[i] = 1 / fit_v[i]
+        sum += fit_v[i]
     for i in range(group_cnt):
         fit_v[i] /= sum
 
@@ -182,6 +185,7 @@ group_cnt = 10
 cross_p = 0.88
 mutation_p = 0.01
 epochs = 100
+best_v = 1e9
 
 temp_net = Net()
 par_maxcnt = sum(p.numel() for p in temp_net.parameters() if p.requires_grad)
@@ -192,4 +196,3 @@ for i in range(epochs):
     s = time.time()
     evolution(net_group)
     e = time.time()
-    print("cost", e - s, "s")
